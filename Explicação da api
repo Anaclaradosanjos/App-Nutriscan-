@@ -1,0 +1,184 @@
+Explicação Detalhada da Minha API Node.js
+Minha API é uma aplicação de backend que construí usando o Express.js. Ela serve para gerenciar usuários, produtos, favoritos e o histórico de visualização. Para simplificar, usei um "banco de dados falso" ou "mock" em memória (mockDB.js), então os dados são resetados toda vez que o servidor reinicia, mas para prototipagem e testes, funciona muito bem!
+
+1. server.js (Arquivo Principal do Servidor)
+Este é o coração da minha aplicação.
+
+Minhas Importações:
+
+express: É o framework que uso para construir a API.
+
+body-parser: Me ajuda a entender os dados que vêm nas requisições HTTP, especialmente JSON.
+
+cors: Essencial para permitir que meu frontend (que roda em um endereço diferente) se comunique com esta API sem problemas.
+
+userRoutes, productRoutes, favoriteRoutes: Eu separei as funcionalidades em módulos para manter tudo organizado.
+
+Como Configurei o Express:
+
+const app = express();: Crio a minha aplicação Express aqui.
+
+const PORT = 3000;: Defini que o servidor vai rodar na porta 3000.
+
+app.use(cors());: Eu disse ao Express para usar o CORS globalmente.
+
+app.use(bodyParser.json());: Isso garante que ele consiga ler os corpos das requisições em formato JSON.
+
+Como Uso as Rotas:
+
+app.use('/api/users', userRoutes);: Todas as requisições que começam com /api/users são direcionadas para o meu módulo de rotas de usuários.
+
+app.use('/api/products', productRoutes);: O mesmo para /api/products.
+
+app.use('/api/favorites', favoriteRoutes);: E para /api/favorites.
+
+Iniciando o Servidor:
+
+app.listen(3000, () => { ... });: Aqui eu faço o servidor começar a "escutar" na porta 3000, e ele me avisa no console quando está online.
+
+2. data/mockDB.js (Meu Banco de Dados Simulado)
+Este é o arquivo onde eu simulei meu banco de dados.
+
+Importação: Usei uuidv4 para gerar IDs únicos, o que é bem útil.
+
+Meus Arrays de Dados:
+
+users = []: Aqui guardo os dados dos usuários (id, email, senha).
+
+products = []: Eu pré-defini alguns produtos com seus detalhes (id, nome, ingredientes, alerta, selos) para simular os produtos escaneados.
+
+favorites = []: Armazeno os pares userId e productId para saber quem favoritou o quê.
+
+historico = []: E aqui registro qual userId viu qual productId e em que data.
+
+Exportando os Dados: Todos esses arrays são exportados para que meus controladores possam acessá-los e modificá-los.
+
+3. routes/users.js (Minhas Rotas de Usuários)
+Este arquivo cuida de tudo relacionado à autenticação de usuários.
+
+Minhas Importações:
+
+express.Router(): Criei um "mini-aplicativo" de rotas aqui.
+
+userController: Importei o controlador que contém a lógica para essas rotas.
+
+Como Defini as Rotas:
+
+router.post('/register', userController.register);: Uma requisição POST para /register (que no servidor vira /api/users/register) é enviada para a minha função register no controlador de usuários.
+
+router.post('/login', userController.login);: O mesmo para /login (que vira /api/users/login), indo para a minha função login.
+
+4. controllers/userController.js (Minha Lógica de Negócios para Usuários)
+Aqui está o código que lida com o registro e login dos usuários.
+
+Minhas Importações:
+
+users: Peguei o array de usuários do mockDB.
+
+v4 as uuidv4: Para gerar os IDs únicos.
+
+exports.register = (req, res) => { ... }; (Registrando um Usuário):
+
+Eu extraio o email e a senha do que o usuário me enviou.
+
+Verifico se já existe um usuário com aquele email. Se sim, mando um erro 400.
+
+Se não, crio um novo usuário com um ID único.
+
+Adiciono esse novo usuário ao meu array users.
+
+E retorno uma resposta de sucesso (201 Created) com os dados do usuário.
+
+exports.login = (req, res) => { ... }; (Fazendo o Login):
+
+Pego o email e a senha da requisição.
+
+Procuro no meu array users por um usuário que combine com os dois.
+
+Se não encontro, mando um erro 401 (Unauthorized).
+
+Se encontro, retorno uma resposta de sucesso (200 OK) com os dados do usuário logado.
+
+5. routes/products.js (Minhas Rotas de Produtos)
+Este arquivo lida com as operações relacionadas aos produtos.
+
+Minhas Importações: O express.Router() e o productController.
+
+Como Defini as Rotas:
+
+router.get('/:id', productController.getProductById);: Se alguém fizer um GET para /api/products/:id, eu busco um produto específico pelo ID.
+
+router.get('/', productController.getAll);: Um GET simples para /api/products me dá todos os produtos.
+
+6. controllers/productController.js (Minha Lógica de Negócios para Produtos)
+Aqui estão as funções que me permitem buscar informações sobre os produtos.
+
+Minha Importação: Apenas o array products do mockDB.
+
+exports.getAll = (req, res) => { ... }; (Pegando Todos os Produtos):
+
+Só preciso retornar o array products como JSON. Simples assim.
+
+exports.getProductById = (req, res) => { ... }; (Pegando um Produto por ID):
+
+Pego o id que veio na URL.
+
+Procuro o produto correspondente no meu array products.
+
+Se não acho, mando um erro 404.
+
+Se acho, retorno o produto.
+
+7. routes/favorites.js (Minhas Rotas para Favoritos e Histórico)
+Este arquivo gerencia a adição e recuperação de itens favoritos e do histórico.
+
+Minhas Importações: O express.Router() e o favoriteController.
+
+Como Defini as Rotas:
+
+router.post('/favorite', favoriteController.addFavorite);: Para adicionar um produto aos favoritos de um usuário.
+
+router.post('/historico', favoriteController.addHistorico);: Para adicionar um produto ao histórico de visualização.
+
+router.get('/:userId/favorites', favoriteController.getFavorites);: Para pegar todos os favoritos de um usuário específico.
+
+router.get('/:userId/historico', favoriteController.getHistorico);: Para pegar o histórico de visualização de um usuário.
+
+8. controllers/favoriteController.js (Minha Lógica de Negócios para Favoritos e Histórico)
+Aqui eu implemento a lógica por trás dos favoritos e do histórico.
+
+Minhas Importações: Os arrays favorites, historico e products do mockDB.
+
+exports.addFavorite = (req, res) => { ... }; (Adicionando um Favorito):
+
+Pego o userId e o productId do corpo da requisição.
+
+Adiciono um novo objeto { userId, productId } ao meu array favorites.
+
+E retorno uma mensagem de sucesso.
+
+exports.addHistorico = (req, res) => { ... }; (Adicionando ao Histórico):
+
+Pego o userId e o productId.
+
+Adiciono um objeto { userId, productId, data: new Date() } ao meu array historico, registrando a data.
+
+Retorno uma mensagem de sucesso.
+
+exports.getFavorites = (req, res) => { ... }; (Pegando os Favoritos):
+
+Pego o userId da URL.
+
+Filtro meu array favorites para encontrar todos os favoritos daquele usuário.
+
+Depois, uso map para buscar os detalhes completos de cada produto favorito no meu array products e os retorno.
+
+exports.getHistorico = (req, res) => { ... }; (Pegando o Histórico):
+
+Pego o userId da URL.
+
+Filtro meu array historico para encontrar as entradas daquele usuário.
+
+Com map, combino os detalhes do produto com a data em que foi visualizado e retorno tudo.
+
+No geral, minha API é uma aplicação Node.js bem organizada que fornece as funcionalidades básicas de autenticação de usuários, listagem de produtos e gerenciamento de favoritos e histórico, tudo isso usando um banco de dados falso ou "mock" simples em memória. 
