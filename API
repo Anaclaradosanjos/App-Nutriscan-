@@ -1,0 +1,334 @@
+// server.js
+
+const express = require('express');
+
+const bodyParser = require('body-parser');
+
+const cors = require('cors');
+
+
+
+// Importando rotas
+
+const userRoutes = require('./routes/users');
+
+const productRoutes = require('./routes/products');
+
+const favoriteRoutes = require('./routes/favorites');
+
+
+
+const app = express();
+
+const PORT = 3000;
+
+
+
+app.use(cors());
+
+app.use(bodyParser.json());
+
+
+
+// Usando rotas
+
+app.use('/api/users', userRoutes);
+
+app.use('/api/products', productRoutes);
+
+app.use('/api/favorites', favoriteRoutes);
+
+
+
+app.listen(3000, () => {
+
+  console.log('Servidor rodando na porta 3000');
+
+});
+
+--------------------------------------------------------------------
+
+
+
+// data/mockDB.js
+
+
+
+const { v4: uuidv4 } = require('uuid');
+
+
+
+const users = []; // { id, email, senha }
+
+const products = [ // Simula os produtos escaneados
+
+  {
+
+    id: '1',
+
+    nome: 'Refrigerante Cola',
+
+    ingredientes: ['Água', 'Açúcar', 'Corante'],
+
+    alerta: 'Alto teor de açúcar',
+
+    selos: ['Não sustentável']
+
+  },
+
+  {
+
+    id: '2',
+
+    nome: 'Suco Natural',
+
+    ingredientes: ['Água', 'Suco de fruta'],
+
+    alerta: 'Sem adição de açúcar',
+
+    selos: ['Orgânico', 'Sustentável']
+
+  }
+
+];
+
+const favorites = []; // { userId, productId }
+
+const historico = []; // { userId, productId, data }
+
+
+
+module.exports = {
+
+  users,
+
+  products,
+
+  favorites,
+
+  historico
+
+};
+
+
+
+
+
+-----------------------------------------------------------------------
+
+routes > users.js 
+
+const express = require('express');
+
+const router = express.Router();
+
+const userController = require('../controllers/userController');
+
+
+
+router.post('/register', userController.register);
+
+router.post('/login', userController.login);
+
+
+
+module.exports = router;
+
+-------------------------------------------------------------------------
+
+controllers> userController.js
+
+const { users } = require('../data/mockDB');
+
+const { v4: uuidv4 } = require('uuid');
+
+
+
+exports.register = (req, res) => {
+
+  const { email, senha } = req.body;
+
+
+
+  if (users.find(u => u.email === email)) {
+
+    return res.status(400).json({ message: 'Usuário já existe' });
+
+  }
+
+
+
+  const newUser = { id: uuidv4(), email, senha };
+
+  users.push(newUser);
+
+
+
+  res.status(201).json({ message: 'Usuário cadastrado com sucesso', user: newUser });
+
+};
+
+
+
+exports.login = (req, res) => {
+
+  const { email, senha } = req.body;
+
+  const user = users.find(u => u.email === email && u.senha === senha);
+
+
+
+  if (!user) {
+
+    return res.status(401).json({ message: 'Credenciais inválidas' });
+
+  }
+
+
+
+  res.status(200).json({ message: 'Login realizado', user });
+
+};
+
+-----------------------------------------------------------------
+
+controllers > productControllers.js 
+
+const { products } = require('../data/mockDB');
+
+
+
+exports.getAll = (req, res) => {
+
+  res.json(products);
+
+};
+
+
+
+exports.getProductById = (req, res) => {
+
+  const product = products.find(p => p.id === req.params.id);
+
+  if (!product) {
+
+    return res.status(404).json({ message: 'Produto não encontrado' });
+
+  }
+
+  res.json(product);
+
+};
+
+-----------------------------------------------------------------------
+
+controllers > favoriteControllers.js 
+
+const { favorites, historico, products } = require('../data/mockDB');
+
+
+
+exports.addFavorite = (req, res) => {
+
+  const { userId, productId } = req.body;
+
+  favorites.push({ userId, productId });
+
+  res.json({ message: 'Favorito adicionado' });
+
+};
+
+
+
+exports.addHistorico = (req, res) => {
+
+  const { userId, productId } = req.body;
+
+  historico.push({ userId, productId, data: new Date() });
+
+  res.json({ message: 'Adicionado ao histórico' });
+
+};
+
+
+
+exports.getFavorites = (req, res) => {
+
+  const userFavorites = favorites
+
+    .filter(f => f.userId === req.params.userId)
+
+    .map(f => products.find(p => p.id === f.productId));
+
+  res.json(userFavorites);
+
+};
+
+
+
+exports.getHistorico = (req, res) => {
+
+  const userHist = historico
+
+    .filter(h => h.userId === req.params.userId)
+
+    .map(h => {
+
+      const product = products.find(p => p.id === h.productId);
+
+      return { ...product, data: h.data };
+
+    });
+
+  res.json(userHist);
+
+};
+
+------------------------------------------------------------
+
+routes> favorites.js 
+
+const express = require('express');
+
+const router = express.Router();
+
+const favoriteController = require('../controllers/favoriteController');
+
+
+
+router.post('/favorite', favoriteController.addFavorite);
+
+router.post('/historico', favoriteController.addHistorico);
+
+router.get('/:userId/favorites', favoriteController.getFavorites);
+
+router.get('/:userId/historico', favoriteController.getHistorico);
+
+
+
+module.exports = router;
+
+-----------------------------------------------------------------------
+
+routes> products.js
+
+const express = require('express');
+
+const router = express.Router();
+
+const productController = require('../controllers/productController');
+
+
+
+router.get('/:id', productController.getProductById);
+
+router.get('/', productController.getAll);
+
+
+
+module.exports = router;
+
+
+
+
+
