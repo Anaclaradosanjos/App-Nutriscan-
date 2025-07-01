@@ -10,3 +10,10 @@ Eu, Ana, faço parte do grupo responsável pelo backend do aplicativo. Nossa fun
 Estamos utilizando tecnologias como Node.js, Express e JavaScript, além do VSCode como nosso ambiente de desenvolvimento.
 
 Esse projeto tem sido uma ótima oportunidade para aplicar na prática o que aprendemos em aula sobre programação, organização de sistemas e desenvolvimento de soluções úteis para a sociedade.
+
+Grupo 6
+Ana clara dos anjos 
+Nicolly Amaral
+Isabelly Vitoria
+Heitor 
+Rian Kelvin 
