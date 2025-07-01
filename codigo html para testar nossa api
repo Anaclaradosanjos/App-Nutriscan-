@@ -1,0 +1,643 @@
+Codgigo de html para testes 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutriscan - Seu Guia Completo</title>
+    <!-- Inclui Tailwind CSS para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuração do Tailwind para usar a fonte Inter -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdf4; /* Verde claro de fundo */
+        }
+        /* Estilos adicionais para botões e inputs */
+        .btn-primary {
+            @apply bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-200;
+        }
+        .btn-secondary {
+            @apply bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-200;
+        }
+        .input-field {
+            /* Alterado: Adicionado mais padding e shadow-sm */
+            @apply p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm;
+        }
+        .card {
+            @apply bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen items-center justify-center p-4">
+    <div id="app" class="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden p-8">
+        <!-- Título principal do aplicativo -->
+        <h1 class="text-4xl font-extrabold text-center text-green-700 mb-8">Nutriscan</h1>
+
+        <!-- Seção de Mensagens -->
+        <div id="message-container" class="mb-6 hidden">
+            <p id="message-text" class="p-3 rounded-lg text-center font-medium"></p>
+        </div>
+
+        <!-- Seção de Login/Registro -->
+        <div id="auth-page" class="space-y-6 p-6 rounded-xl bg-gray-50 border border-gray-200"> <!-- Adicionado borda para melhor visual -->
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Acesse sua Conta</h2>
+
+            <div class="flex justify-center mb-6 space-x-4">
+                <!-- Botões de alternar entre Login e Cadastre-se com estilo aprimorado -->
+                <button id="show-login-btn" class="flex-1 btn-primary">Login</button>
+                <button id="show-register-btn" class="flex-1 btn-secondary">Cadastre-se</button>
+            </div>
+
+            <!-- Formulário de Login -->
+            <form id="login-form" class="flex flex-col space-y-5"> <!-- Aumentado o espaço entre os elementos -->
+                <input type="email" id="login-email" placeholder="Email" class="input-field" required>
+                <input type="password" id="login-password" placeholder="Senha" class="input-field" required>
+                <button type="submit" class="btn-primary">Entrar</button>
+            </form>
+
+            <!-- Formulário de Registro (inicialmente oculto) -->
+            <form id="register-form" class="flex-col space-y-5 hidden"> <!-- Aumentado o espaço entre os elementos -->
+                <input type="text" id="register-name" placeholder="Nome Completo" class="input-field" required>
+                <input type="email" id="register-email" placeholder="Email" class="input-field" required>
+                <input type="password" id="register-password" placeholder="Senha" class="input-field" required>
+                <input type="password" id="register-confirm-password" placeholder="Confirmar Senha" class="input-field" required>
+                <button type="submit" class="btn-primary">Registrar</button>
+            </form>
+        </div>
+
+        <!-- Seção Principal do Aplicativo (inicialmente oculta) -->
+        <div id="main-app-page" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Bem-vindo, <span id="user-email-display"></span>!</h2>
+                <button id="logout-btn" class="btn-secondary">Sair</button>
+            </div>
+
+            <!-- Navegação principal com nova aba para Buscar Produto -->
+            <nav class="flex justify-around mb-6 p-2 bg-green-100 rounded-xl shadow-sm">
+                <button id="nav-products-btn" class="flex-1 btn-secondary text-green-700 hover:bg-green-200">Produtos</button>
+                <button id="nav-search-btn" class="flex-1 btn-secondary text-green-700 hover:bg-green-200 ml-2">Buscar Produto</button>
+                <button id="nav-favorites-btn" class="flex-1 btn-secondary text-green-700 hover:bg-green-200 ml-2">Meus Favoritos</button>
+                <button id="nav-history-btn" class="flex-1 btn-secondary text-green-700 hover:bg-green-200 ml-2">Meu Histórico</button>
+            </nav>
+
+            <!-- Conteúdo da página de Produtos -->
+            <div id="products-list-page" class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Produtos Disponíveis (Simulação de Escaneamento)</h3>
+                <div id="products-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Produtos serão carregados aqui -->
+                </div>
+            </div>
+
+            <!-- Conteúdo da página de Detalhes do Produto (inicialmente oculto) -->
+            <div id="product-detail-page" class="hidden space-y-4">
+                <button id="back-to-products-btn" class="btn-secondary mb-4">&larr; Voltar para Produtos</button>
+                <h3 class="text-2xl font-bold text-green-700" id="detail-product-name"></h3>
+                <p class="text-gray-600"><strong>Ingredientes:</strong> <span id="detail-product-ingredients"></span></p>
+                <p class="text-gray-600"><strong>Alerta:</strong> <span id="detail-product-alerta" class="font-semibold text-red-600"></span></p>
+                <p class="text-gray-600"><strong>Selos:</strong> <span id="detail-product-selos" class="font-semibold text-blue-600"></span></p>
+                <div class="flex space-x-4 mt-6">
+                    <button id="add-favorite-btn" class="btn-primary flex-1">Adicionar aos Favoritos</button>
+                    <button id="add-history-btn" class="btn-primary flex-1">Adicionar ao Histórico</button>
+                </div>
+            </div>
+
+            <!-- Nova Seção: Buscar Produto por ID (inicialmente oculta) -->
+            <div id="search-product-page" class="hidden space-y-4">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Buscar Produto por ID</h3>
+                <label for="search-id-input" class="block text-lg font-semibold text-gray-700">Digite o ID do Produto:</label>
+                <input type="text" id="search-id-input" placeholder="Ex: 1 ou 2" class="input-field w-full" required>
+                <button id="perform-search-btn" class="btn-primary w-full">Buscar Produto</button>
+
+                <!-- Detalhes do Produto Buscado -->
+                <div id="searched-product-details" class="hidden mt-8 p-6 bg-green-50 rounded-lg border border-green-200">
+                    <h3 class="text-2xl font-bold text-green-800 mb-4" id="searched-detail-product-name"></h3>
+                    <p class="text-gray-700 mb-2"><strong>ID:</strong> <span id="searched-detail-product-id"></span></p>
+                    <p class="text-gray-700 mb-2"><strong>Ingredientes:</strong> <span id="searched-detail-product-ingredients"></span></p>
+                    <p class="text-gray-700 mb-2"><strong>Alerta:</strong> <span id="searched-detail-product-alerta" class="font-semibold text-red-600"></span></p>
+                    <p class="text-gray-700"><strong>Selos:</strong> <span id="searched-detail-product-selos" class="font-semibold text-blue-600"></span></p>
+                </div>
+            </div>
+
+            <!-- Conteúdo da página de Favoritos (inicialmente oculto) -->
+            <div id="favorites-page" class="hidden space-y-4">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Meus Produtos Favoritos</h3>
+                <div id="favorites-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Favoritos serão carregados aqui -->
+                </div>
+                <p id="no-favorites-message" class="text-gray-500 text-center hidden">Você ainda não tem produtos favoritos.</p>
+            </div>
+
+            <!-- Conteúdo da página de Histórico (inicialmente oculto) -->
+            <div id="history-page" class="hidden space-y-4">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Meu Histórico de Escaneamento</h3>
+                <div id="history-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Histórico será carregado aqui -->
+                </div>
+                <p id="no-history-message" class="text-gray-500 text-center hidden">Seu histórico está vazio.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL base da sua API. Certifique-se de que o servidor Node.js esteja rodando na porta 3000
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // Variável global para armazenar os dados do usuário logado
+        let currentUser = null;
+
+        // Referências aos elementos HTML
+        const authPage = document.getElementById('auth-page');
+        const mainAppPage = document.getElementById('main-app-page');
+        const messageContainer = document.getElementById('message-container');
+        const messageText = document.getElementById('message-text');
+
+        // Elementos do formulário de autenticação
+        const showLoginBtn = document.getElementById('show-login-btn');
+        const showRegisterBtn = document.getElementById('show-register-btn');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Elementos da navegação principal
+        const navProductsBtn = document.getElementById('nav-products-btn');
+        const navSearchBtn = document.getElementById('nav-search-btn'); // Novo botão de busca
+        const navFavoritesBtn = document.getElementById('nav-favorites-btn');
+        const navHistoryBtn = document.getElementById('nav-history-btn');
+
+        // Páginas de conteúdo
+        const productsListPage = document.getElementById('products-list-page');
+        const productDetailPage = document.getElementById('product-detail-page');
+        const searchProductPage = document.getElementById('search-product-page'); // Nova página de busca
+        const favoritesPage = document.getElementById('favorites-page');
+        const historyPage = document.getElementById('history-page');
+
+        // Containers de conteúdo
+        const productsContainer = document.getElementById('products-container');
+        const favoritesContainer = document.getElementById('favorites-container');
+        const historyContainer = document.getElementById('history-container');
+
+        // Elementos de detalhes do produto
+        const detailProductName = document.getElementById('detail-product-name');
+        const detailProductIngredients = document.getElementById('detail-product-ingredients');
+        const detailProductAlerta = document.getElementById('detail-product-alerta');
+        const detailProductSelos = document.getElementById('detail-product-selos');
+        const addFavoriteBtn = document.getElementById('add-favorite-btn');
+        const addHistoryBtn = document.getElementById('add-history-btn');
+        const backToProductsBtn = document.getElementById('back-to-products-btn');
+
+        // Elementos da nova seção de busca por ID
+        const searchIdInput = document.getElementById('search-id-input');
+        const performSearchBtn = document.getElementById('perform-search-btn');
+        const searchedProductDetailsDiv = document.getElementById('searched-product-details');
+        const searchedDetailProductName = document.getElementById('searched-detail-product-name');
+        const searchedDetailProductId = document.getElementById('searched-detail-product-id');
+        const searchedDetailProductIngredients = document.getElementById('searched-detail-product-ingredients');
+        const searchedDetailProductAlerta = document.getElementById('searched-detail-product-alerta');
+        const searchedDetailProductSelos = document.getElementById('searched-detail-product-selos');
+
+        // Elementos de mensagem vazia
+        const noFavoritesMessage = document.getElementById('no-favorites-message');
+        const noHistoryMessage = document.getElementById('no-history-message');
+
+        // Variável para armazenar o ID do produto atualmente visualizado nos detalhes
+        let currentProductId = null;
+
+        /**
+         * Exibe uma mensagem para o usuário.
+         * @param {string} message - A mensagem a ser exibida.
+         * @param {'success'|'error'|'info'} type - O tipo da mensagem (para estilização).
+         */
+        function showMessage(message, type) {
+            messageText.textContent = message;
+            messageContainer.classList.remove('hidden');
+            messageText.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-blue-100', 'text-blue-800');
+
+            if (type === 'success') {
+                messageText.classList.add('bg-green-100', 'text-green-800');
+            } else if (type === 'error') {
+                messageText.classList.add('bg-red-100', 'text-red-800');
+            } else {
+                messageText.classList.add('bg-blue-100', 'text-blue-800');
+            }
+
+            // Oculta a mensagem após 3 segundos
+            setTimeout(() => {
+                messageContainer.classList.add('hidden');
+            }, 3000);
+        }
+
+        /**
+         * Alterna a visibilidade das seções da aplicação.
+         * @param {string} pageId - O ID da página a ser exibida (ex: 'products-list-page').
+         */
+        function showPage(pageId) {
+            // Oculta todas as páginas de conteúdo
+            productsListPage.classList.add('hidden');
+            productDetailPage.classList.add('hidden');
+            searchProductPage.classList.add('hidden'); // Oculta a página de busca
+            favoritesPage.classList.add('hidden');
+            historyPage.classList.add('hidden');
+
+            // Exibe a página solicitada
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        /**
+         * Lida com o registro de um novo usuário.
+         * @param {Event} event - O evento de submissão do formulário.
+         */
+        async function handleRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('register-name').value; // Nome completo não é usado na API, mas incluído para UX
+            const email = document.getElementById('register-email').value;
+            const senha = document.getElementById('register-password').value;
+            const confirmSenha = document.getElementById('register-confirm-password').value;
+
+            if (senha !== confirmSenha) {
+                showMessage('As senhas não coincidem.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message, 'success');
+                    // Após o registro, pode-se logar o usuário ou levá-lo para a tela de login
+                    document.getElementById('login-email').value = email;
+                    document.getElementById('login-password').value = senha;
+                    showLoginForm(); // Volta para o formulário de login
+                } else {
+                    showMessage(data.message || 'Erro ao registar.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao registar:', error);
+                showMessage('Erro de conexão ao registar. Verifique se o servidor da API está a correr.', 'error');
+            }
+        }
+
+        /**
+         * Lida com o login do usuário.
+         * @param {Event} event - O evento de submissão do formulário.
+         */
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const senha = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message, 'success');
+                    currentUser = data.user; // Armazena os dados do usuário
+                    document.getElementById('user-email-display').textContent = currentUser.email;
+                    authPage.classList.add('hidden');
+                    mainAppPage.classList.remove('hidden');
+                    loadProducts(); // Carrega os produtos ao logar
+                    showPage('products-list-page'); // Vai para a página de produtos
+                } else {
+                    showMessage(data.message || 'Erro ao fazer login.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao fazer login:', error);
+                showMessage('Erro de conexão ao fazer login. Verifique se o servidor da API está a correr.', 'error');
+            }
+        }
+
+        /**
+         * Lida com o logout do usuário.
+         */
+        function handleLogout() {
+            currentUser = null;
+            authPage.classList.remove('hidden');
+            mainAppPage.classList.add('hidden');
+            // Limpa os campos de login
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            showMessage('Você foi desconectado.', 'info');
+            showLoginForm(); // Volta para o formulário de login
+        }
+
+        /**
+         * Carrega e exibe a lista de todos os produtos.
+         */
+        async function loadProducts() {
+            productsContainer.innerHTML = '<p class="text-center text-gray-500 col-span-full">A carregar produtos...</p>';
+            try {
+                const response = await fetch(`${API_BASE_URL}/products`);
+                const products = await response.json();
+
+                productsContainer.innerHTML = ''; // Limpa o container
+                if (products.length === 0) {
+                    productsContainer.innerHTML = '<p class="text-center text-gray-500 col-span-full">Nenhum produto encontrado.</p>';
+                    return;
+                }
+
+                products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'card cursor-pointer';
+                    productCard.innerHTML = `
+                        <h4 class="text-lg font-semibold text-green-800">${product.nome}</h4>
+                        <p class="text-sm text-gray-600">Alerta: <span class="font-medium text-red-500">${product.alerta || 'Nenhum'}</span></p>
+                        <p class="text-sm text-gray-600">Selos: <span class="font-medium text-blue-500">${product.selos && product.selos.length > 0 ? product.selos.join(', ') : 'Nenhum'}</span></p>
+                    `;
+                    // Adiciona um evento de clique para ver os detalhes do produto
+                    productCard.addEventListener('click', () => displayProduct(product.id));
+                    productsContainer.appendChild(productCard);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                productsContainer.innerHTML = '<p class="text-center text-red-500 col-span-full">Erro ao carregar produtos. Verifique se o servidor da API está a correr.</p>';
+                showMessage('Erro ao carregar produtos. Verifique se o servidor da API está a correr.', 'error');
+            }
+        }
+
+        /**
+         * Exibe os detalhes de um produto específico.
+         * @param {string} productId - O ID do produto a ser exibido.
+         */
+        async function displayProduct(productId) {
+            currentProductId = productId; // Armazena o ID do produto atual
+            try {
+                const response = await fetch(`${API_BASE_URL}/products/${productId}`);
+                const product = await response.json();
+
+                if (response.ok) {
+                    detailProductName.textContent = product.nome;
+                    detailProductIngredients.textContent = product.ingredientes ? product.ingredientes.join(', ') : 'Não informado';
+                    detailProductAlerta.textContent = product.alerta || 'Nenhum';
+                    detailProductSelos.textContent = product.selos && product.selos.length > 0 ? product.selos.join(', ') : 'Nenhum';
+                    showPage('product-detail-page'); // Muda para a página de detalhes
+                } else {
+                    showMessage(product.message || 'Produto não encontrado.', 'error');
+                    showPage('products-list-page'); // Volta para a lista de produtos
+                }
+            } catch (error) {
+                console.error('Erro ao procurar detalhes do produto:', error);
+                showMessage('Erro ao procurar detalhes do produto. Verifique se o servidor da API está a correr.', 'error');
+                showPage('products-list-page');
+            }
+        }
+
+        /**
+         * Adiciona o produto atualmente visualizado aos favoritos do usuário.
+         */
+        async function addProductToFavorites() {
+            if (!currentUser || !currentProductId) {
+                showMessage('Por favor, faça login e selecione um produto primeiro.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/favorites/favorite`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: currentUser.id, productId: currentProductId })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message || 'Produto adicionado aos favoritos!', 'success');
+                } else {
+                    showMessage(data.message || 'Erro ao adicionar aos favoritos.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar favorito:', error);
+                showMessage('Erro de conexão ao adicionar aos favoritos. Verifique se o servidor da API está a correr.', 'error');
+            }
+        }
+
+        /**
+         * Adiciona o produto atualmente visualizado ao histórico do usuário.
+         */
+        async function addProductToHistory() {
+            if (!currentUser || !currentProductId) {
+                showMessage('Por favor, faça login e selecione um produto primeiro.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/favorites/historico`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: currentUser.id, productId: currentProductId })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message || 'Produto adicionado ao histórico!', 'success');
+                } else {
+                    showMessage(data.message || 'Erro ao adicionar ao histórico.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar histórico:', error);
+                showMessage('Erro de conexão ao adicionar ao histórico. Verifique se o servidor da API está a correr.', 'error');
+            }
+        }
+
+        /**
+         * Lida com a busca de um produto por ID na nova aba de busca.
+         */
+        async function handleSearchProductById() {
+            const productId = searchIdInput.value.trim();
+
+            if (!productId) {
+                showMessage('Por favor, digite um ID de produto para buscar.', 'info');
+                return;
+            }
+
+            // Oculta os detalhes do produto buscado e a mensagem anterior
+            searchedProductDetailsDiv.classList.add('hidden');
+            messageContainer.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/products/${productId}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Preenche os detalhes do produto
+                    searchedDetailProductName.textContent = data.nome;
+                    searchedDetailProductId.textContent = data.id;
+                    searchedDetailProductIngredients.textContent = data.ingredientes ? data.ingredientes.join(', ') : 'Não informado';
+                    searchedDetailProductAlerta.textContent = data.alerta || 'Nenhum';
+                    searchedDetailProductSelos.textContent = data.selos && data.selos.length > 0 ? data.selos.join(', ') : 'Nenhum';
+                    searchedProductDetailsDiv.classList.remove('hidden'); // Mostra a seção de detalhes
+                    showMessage('Produto encontrado com sucesso!', 'success');
+                } else {
+                    showMessage(data.message || 'Produto não encontrado.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao buscar produto por ID:', error);
+                showMessage('Erro de conexão ao buscar produto por ID. Verifique se o servidor da API está a correr.', 'error');
+            }
+        }
+
+        /**
+         * Carrega e exibe a lista de produtos favoritos do usuário logado.
+         */
+        async function loadFavorites() {
+            if (!currentUser) {
+                showMessage('Por favor, faça login para ver os seus favoritos.', 'error');
+                return;
+            }
+            favoritesContainer.innerHTML = '<p class="text-center text-gray-500 col-span-full">A carregar favoritos...</p>';
+            noFavoritesMessage.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/favorites/${currentUser.id}/favorites`);
+                const favorites = await response.json();
+
+                favoritesContainer.innerHTML = ''; // Limpa o container
+                if (favorites.length === 0) {
+                    noFavoritesMessage.classList.remove('hidden');
+                    return;
+                }
+
+                favorites.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'card cursor-pointer';
+                    productCard.innerHTML = `
+                        <h4 class="text-lg font-semibold text-green-800">${product.nome}</h4>
+                        <p class="text-sm text-gray-600">Alerta: <span class="font-medium text-red-500">${product.alerta || 'Nenhum'}</span></p>
+                        <p class="text-sm text-gray-600">Selos: <span class="font-medium text-blue-500">${product.selos && product.selos.length > 0 ? product.selos.join(', ') : 'Nenhum'}</span></p>
+                    `;
+                    productCard.addEventListener('click', () => displayProduct(product.id));
+                    favoritesContainer.appendChild(productCard);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar favoritos:', error);
+                favoritesContainer.innerHTML = '<p class="text-center text-red-500 col-span-full">Erro ao carregar favoritos. Verifique se o servidor da API está a correr.</p>';
+                showMessage('Erro ao carregar favoritos. Verifique se o servidor da API está a correr.', 'error');
+            }
+        }
+
+        /**
+         * Carrega e exibe a lista de histórico de escaneamento do usuário logado.
+         */
+        async function loadHistory() {
+            if (!currentUser) {
+                showMessage('Por favor, faça login para ver o seu histórico.', 'error');
+                return;
+            }
+            historyContainer.innerHTML = '<p class="text-center text-gray-500 col-span-full">A carregar histórico...</p>';
+            noHistoryMessage.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/favorites/${currentUser.id}/historico`);
+                const history = await response.json();
+
+                historyContainer.innerHTML = ''; // Limpa o container
+                if (history.length === 0) {
+                    noHistoryMessage.classList.remove('hidden');
+                    return;
+                }
+
+                history.forEach(item => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'card cursor-pointer';
+                    const scanDate = new Date(item.data).toLocaleDateString('pt-BR', {
+                        year: 'numeric', month: 'long', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+                    productCard.innerHTML = `
+                        <h4 class="text-lg font-semibold text-green-800">${item.nome}</h4>
+                        <p class="text-sm text-gray-600">Escaneado em: <span class="font-medium text-gray-700">${scanDate}</span></p>
+                        <p class="text-sm text-gray-600">Alerta: <span class="font-medium text-red-500">${item.alerta || 'Nenhum'}</span></p>
+                    `;
+                    productCard.addEventListener('click', () => displayProduct(item.id));
+                    historyContainer.appendChild(productCard);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar histórico:', error);
+                // CORREÇÃO: Removido o parêntese extra aqui
+                historyContainer.innerHTML = '<p class="text-center text-red-500 col-span-full">Erro ao carregar histórico. Verifique se o servidor da API está a correr.</p>';
+                showMessage('Erro ao carregar histórico. Verifique se o servidor da API está a correr.', 'error');
+            }
+        }
+
+        /**
+         * Exibe o formulário de login e oculta o de registro.
+         */
+        function showLoginForm() {
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            showLoginBtn.classList.remove('btn-secondary');
+            showLoginBtn.classList.add('btn-primary');
+            showRegisterBtn.classList.remove('btn-primary');
+            showRegisterBtn.classList.add('btn-secondary');
+            console.log('showLoginForm called. Login form should be visible.'); // Adicionado para depuração
+        }
+
+        /**
+         * Exibe o formulário de registro e oculta o de login.
+         */
+        function showRegisterForm() {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            showRegisterBtn.classList.remove('btn-secondary');
+            showRegisterBtn.classList.add('btn-primary');
+            showLoginBtn.classList.remove('btn-primary');
+            showLoginBtn.classList.add('btn-secondary');
+            console.log('showRegisterForm called. Register form should be visible.'); // Adicionado para depuração
+        }
+
+        // --- Adição de Event Listeners ---
+        showLoginBtn.addEventListener('click', showLoginForm);
+        showRegisterBtn.addEventListener('click', showRegisterForm);
+        loginForm.addEventListener('submit', handleLogin);
+        registerForm.addEventListener('submit', handleRegister);
+        logoutBtn.addEventListener('click', handleLogout);
+
+        // Eventos de navegação
+        navProductsBtn.addEventListener('click', () => {
+            showPage('products-list-page');
+            loadProducts();
+        });
+        navSearchBtn.addEventListener('click', () => { // Evento para a nova aba de busca
+            showPage('search-product-page');
+            searchedProductDetailsDiv.classList.add('hidden'); // Oculta detalhes ao mudar de aba
+            searchIdInput.value = ''; // Limpa o campo de busca
+        });
+        navFavoritesBtn.addEventListener('click', () => {
+            showPage('favorites-page');
+            loadFavorites();
+        });
+        navHistoryBtn.addEventListener('click', () => {
+            showPage('history-page');
+            loadHistory();
+        });
+
+        // Botões na página de detalhes do produto
+        addFavoriteBtn.addEventListener('click', addProductToFavorites);
+        addHistoryBtn.addEventListener('click', addProductToHistory);
+        backToProductsBtn.addEventListener('click', () => {
+            showPage('products-list-page');
+            currentProductId = null; // Limpa o ID do produto atual
+        });
+
+        // Eventos para a nova seção de busca por ID
+        performSearchBtn.addEventListener('click', handleSearchProductById);
+        searchIdInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Impede o envio do formulário padrão
+                handleSearchProductById();
+            }
+        });
+
+        // Inicialização: Exibe a página de login/registro ao carregar
+        document.addEventListener('DOMContentLoaded', showLoginForm);
+    </script>
+</body>
+</html>
