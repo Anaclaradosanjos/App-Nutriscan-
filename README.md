@@ -13,7 +13,11 @@ Esse projeto tem sido uma ótima oportunidade para aplicar na prática o que apr
 
 Grupo 6
 Ana clara dos anjos 
+
 Nicolly Amaral
+
 Isabelly Vitoria
+
 Heitor 
+
 Rian Kelvin 
