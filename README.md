@@ -12,6 +12,7 @@ Estamos utilizando tecnologias como Node.js, Express e JavaScript, além do VSCo
 Esse projeto tem sido uma ótima oportunidade para aplicar na prática o que aprendemos em aula sobre programação, organização de sistemas e desenvolvimento de soluções úteis para a sociedade.
 
 Grupo 6
+
 Ana clara dos anjos 
 
 Nicolly Amaral
